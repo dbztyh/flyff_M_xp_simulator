@@ -2,93 +2,117 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+# Text variable to easy change language
+$script:ButtonCancel_Text = "" 
+$script:ButtonOk_Text = "" 
+$script:ButtonUpdate_Text = "" 
+$script:FormLabelMonster_Text = "" 
+$script:FormLabelLevel_Text = "" 
+$script:FormLabelTime_Text = "" 
+$script:FormLabelBonus_Text = "" 
+$script:FormLabelAOE_Text = ""
+$script:ExperienceMonster_Text = ""
+$script:monsterkillbeforeup_Text = ""
+$script:ExperienceMonsterMinute_Text = ""
+$script:ExperienceMonsterHeure_Text = ""
+$script:Timebeforeup_Text = ""
+
+# Form variable
+$script:ListForm = $null
+$script:ListBoxMonster = $null
+$script:ListBoxLevel = $null
+$script:TextBoxTime = $null
+$script:TextBoxBonus = $null
+$script:TextBoxAOE = $null
+
+#Path variable
+$script:Path_parent = $PSScriptRoot.ToString()
+$script:Path = $PSScriptRoot.ToString() + "\ressources"
+$script:api_call = $PSScriptRoot.ToString() + "\call_api.ps1"
+$script:Path_Name_Monster = $PSScriptRoot.ToString() + "\ressources\name_monster.txt"
 
 Function Choice_Language{
     Param ($Tag)
     if ($Tag -eq "US")
     {
-       $ButtonCancel_Text = "EXIT"
-       $ButtonOk_Text = "OK"
-       $ButtonUpdate_Text = "UPDATE"
-       $FormLabelMonster_Text = "monsters :"
-       $FormLabelLevel_Text = "Player level :"
-       $FormLabelTime_Text = "Time to kill a monster or make an AOE in secondes :"
-       $FormLabelBonus_Text = "experience bonus in % (don't complete if you haven't bonus) :"
-       $FormLabelAOE_Text = "Nomber of monster kill (if you make 1v1 don't complete this field) :"
+       $script:ButtonCancel_Text = "EXIT"
+       $script:ButtonOk_Text = "OK"
+       $script:ButtonUpdate_Text = "UPDATE"
+       $script:FormLabelMonster_Text = "monsters :"
+       $script:FormLabelLevel_Text = "Player level :"
+       $script:FormLabelTime_Text = "Time to kill a monster or make an AOE in secondes :"
+       $script:FormLabelBonus_Text = "experience bonus in % (don't complete if you haven't bonus) :"
+       $script:FormLabelAOE_Text = "Nomber of monster kill (if you make 1v1 don't complete this field) :"
+       $script:ExperienceMonster_Text = "experience by monster/AOE make : "
+       $script:monsterkillbeforeup_Text = "Number of monster to do before up : "
+       $script:ExperienceMonsterMinute_Text = "experience by minute : "
+       $script:ExperienceMonsterHeure_Text = "experience by hour : "
+       $script:Timebeforeup_Text = "Time before up : "
     }
     else
     {
-       $ButtonCancel_Text = "SORTIR"
-       $ButtonOk_Text = "OK"
-       $ButtonUpdate_Text = "MISE A JOUR"
-       $FormLabelMonster_Text = "monstres :"
-       $FormLabelLevel_Text = "Level du joueur : "
-       $FormLabelTime_Text = "Temps pour tuer un monstre/faire un AOE en secondes:"
-       $FormLabelBonus_Text = "Bonus expérience en % (ne pas remplir si pas de bonus) :"
-       $FormLabelAOE_Text = "Nombres de monstres tuer par AOE (ne pas remplir si 1V1) :"
+       $script:ButtonCancel_Text = "SORTIR"
+       $script:ButtonOk_Text = "OK"
+       $script:ButtonUpdate_Text = "MISE A JOUR"
+       $script:FormLabelMonster_Text = "monstres :"
+       $script:FormLabelLevel_Text = "Level du joueur : "
+       $script:FormLabelTime_Text = "Temps pour tuer un monstre/faire un AOE en secondes:"
+       $script:FormLabelBonus_Text = "Bonus expérience en % (ne pas remplir si pas de bonus) :"
+       $script:FormLabelAOE_Text = "Nombres de monstres tuer par AOE (ne pas remplir si 1V1) :"
+       $script:ExperienceMonster_Text = "expérience par monstre/AOE tuer : "
+       $script:monsterkillbeforeup_Text = "Nombre de monstre/AOE à faire avant de up :"
+       $script:ExperienceMonsterMinute_Text = "expérience par minute : "
+       $script:ExperienceMonsterHeure_Text = "expérience par heure : "
+       $script:Timebeforeup_Text = "Temps avant de up : "
     }
-    #retour de fonction
-    $return_list_language = $ButtonCancel_Text, $ButtonOk_Text, $ButtonUpdate_Text, $FormLabelMonster_Text, $FormLabelLevel_Text, $FormLabelTime_Text, $FormLabelBonus_Text, $FormLabelAOE_Text
-    return $return_list_language
 }
 
 Function Init{
     Param ($Tag)
-    $return_list_language = Choice_Language $Tag
-    $ButtonCancel_Text = $return_list_language[0] 
-    $ButtonOk_Text = $return_list_language[1] 
-    $ButtonUpdate_Text = $return_list_language[2] 
-    $FormLabelMonster_Text = $return_list_language[3] 
-    $FormLabelLevel_Text = $return_list_language[4] 
-    $FormLabelTime_Text = $return_list_language[5] 
-    $FormLabelBonus_Text = $return_list_language[6] 
-    $FormLabelAOE_Text = $return_list_language[7] 
-    $Path_parent = $PSScriptRoot.ToString()
-    $Path = $PSScriptRoot.ToString() + "\ressources"
-    if (-not ( Test-Path -Path $Path ))
+    Choice_Language $Tag
+    if (-not ( Test-Path -Path $script:Path ))
     {
-        mkdir $Path
-        $api_call = $PSScriptRoot.ToString() + "\call_api.ps1"
-        powershell -file "$api_call"
+        mkdir $script:Path
+        powershell -file "$script:api_call"
     }
 
     #check if assembly file exist and remove if exist to avoid some collision
 
 
     #Ouvre la boite de dialogue
-    $ListForm = New-Object System.Windows.Forms.Form
-    $ListForm.Text = "Test Formulaire"
-    $ListForm.Size = New-Object System.Drawing.Size(800,500)
-    $ListForm.StartPosition = "CenterScreen"
-    $ListForm.TopMost = $True
+    $script:ListForm = New-Object System.Windows.Forms.Form
+    $script:ListForm.Text = "Flyff_M_xp_simulator"
+    $script:ListForm.Size = New-Object System.Drawing.Size(800,600)
+    $script:ListForm.StartPosition = "CenterScreen"
+    $script:ListForm.TopMost = $True
 
     #Cancel button
     $ButtonCancel = New-Object System.Windows.Forms.Button
-    $ButtonCancel.Location = New-Object System.Drawing.Point(520,420)
+    $ButtonCancel.Location = New-Object System.Drawing.Point(520,520)
     $ButtonCancel.Size = New-Object System.Drawing.Size(75,23)
-    $ButtonCancel.Text = "$ButtonCancel_Text"
+    $ButtonCancel.Text = "$script:ButtonCancel_Text"
     $ButtonCancel.BackColor = "#FFDF00"
     $ButtonCancel.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
 
     #Ok button
     $ButtonOk = New-Object System.Windows.Forms.Button
-    $ButtonOk.Location = New-Object System.Drawing.Point(180,420)
+    $ButtonOk.Location = New-Object System.Drawing.Point(180,520)
     $ButtonOk.Size = New-Object System.Drawing.Size(75,23)
-    $ButtonOk.Text = "$ButtonOk_Text"
+    $ButtonOk.Text = "$script:ButtonOk_Text"
     $ButtonOk.BackColor = "#FFDF00"
     $ButtonOk.DialogResult = [System.Windows.Forms.DialogResult]::OK
 
     #Update button
     $ButtonUpdate = New-Object System.Windows.Forms.Button
-    $ButtonUpdate.Location = New-Object System.Drawing.Point(325,420)
+    $ButtonUpdate.Location = New-Object System.Drawing.Point(325,520)
     $ButtonUpdate.Size = New-Object System.Drawing.Size(150,23)
-    $ButtonUpdate.Text = "$ButtonUpdate_Text"
+    $ButtonUpdate.Text = "$script:ButtonUpdate_Text"
     $ButtonUpdate.BackColor = "#0072A0"
     $ButtonUpdate.DialogResult = [System.Windows.Forms.DialogResult]::Retry
 
     #FR button
     $ButtonFR = New-Object System.Windows.Forms.Button
-    $ButtonFR.Location = New-Object System.Drawing.Point(5,5)
+    $ButtonFR.Location = New-Object System.Drawing.Point(320,20)
     $ButtonFR.Size = New-Object System.Drawing.Size(45,30)
     $imageFR = [System.Drawing.Image]::FromFile($Path_parent +"\FR2.png")
     $ButtonFR.Image = $imageFR
@@ -96,7 +120,7 @@ Function Init{
 
     #US button
     $ButtonUS = New-Object System.Windows.Forms.Button
-    $ButtonUS.Location = New-Object System.Drawing.Point(325,5)
+    $ButtonUS.Location = New-Object System.Drawing.Point(420, 20)
     $ButtonUS.Size = New-Object System.Drawing.Size(57,30)
     $imageUS = [System.Drawing.Image]::FromFile($Path_parent +"\US2.png")
     $ButtonUS.Image = $imageUS
@@ -104,66 +128,66 @@ Function Init{
 
     #cree le label Monster
     $FormLabelMonster = New-Object System.Windows.Forms.Label
-    $FormLabelMonster.Location = New-Object System.Drawing.Point(10,20)
+    $FormLabelMonster.Location = New-Object System.Drawing.Point(10,70)
     $FormLabelMonster.Size = New-Object System.Drawing.Size(350,20)
-    $FormLabelMonster.Text = "$FormLabelMonster_Text"
+    $FormLabelMonster.Text = "$script:FormLabelMonster_Text"
 
     #cree la liste Monster
-    $ListBoxMonster = New-Object System.Windows.Forms.ListBox 
-    $ListBoxMonster.Location = New-Object System.Drawing.Size(10,40) 
-    $ListBoxMonster.Size = New-Object System.Drawing.Size(350,250) 
-    $ListBoxMonster.Height = 250
+    $script:ListBoxMonster = New-Object System.Windows.Forms.ListBox 
+    $script:ListBoxMonster.Location = New-Object System.Drawing.Size(10,90) 
+    $script:ListBoxMonster.Size = New-Object System.Drawing.Size(350,300) 
+    $script:ListBoxMonster.Height = 300
 
     #cree le label Level
     $FormLabelLevel = New-Object System.Windows.Forms.Label
-    $FormLabelLevel.Location = New-Object System.Drawing.Point(420,20)
+    $FormLabelLevel.Location = New-Object System.Drawing.Point(420,70)
     $FormLabelLevel.Size = New-Object System.Drawing.Size(350,20)
-    $FormLabelLevel.Text = "$FormLabelLevel_Text"
+    $FormLabelLevel.Text = "$script:FormLabelLevel_Text"
 
     #cree la liste Level
-    $ListBoxLevel = New-Object System.Windows.Forms.ListBox 
-    $ListBoxLevel.Location = New-Object System.Drawing.Size(420,40) 
-    $ListBoxLevel.Size = New-Object System.Drawing.Size(350,250) 
-    $ListBoxLevel.Height = 250
+    $script:ListBoxLevel = New-Object System.Windows.Forms.ListBox 
+    $script:ListBoxLevel.Location = New-Object System.Drawing.Size(420,90) 
+    $script:ListBoxLevel.Size = New-Object System.Drawing.Size(350,300) 
+    $script:ListBoxLevel.Height = 300
 
     #cree le label Time
     $FormLabelTime = New-Object System.Windows.Forms.Label
-    $FormLabelTime.Location = New-Object System.Drawing.Point(10,300)
+    $FormLabelTime.Location = New-Object System.Drawing.Point(10,400)
     $FormLabelTime.Size = New-Object System.Drawing.Size(350,20)
-    $FormLabelTime.Text = "$FormLabelTime_Text"
+    $FormLabelTime.Text = "$script:FormLabelTime_Text"
 
     #cree l edit box Time
-    $TextBoxTime = New-Object System.Windows.Forms.TextBox
-    $TextBoxTime.Location = New-Object System.Drawing.Point(10,320)
-    $TextBoxTime.Size = New-Object System.Drawing.Size(350,20)
+    $script:TextBoxTime = New-Object System.Windows.Forms.TextBox
+    $script:TextBoxTime.Location = New-Object System.Drawing.Point(10,420)
+    $script:TextBoxTime.Size = New-Object System.Drawing.Size(350,20)
 
     #cree le label Bonus
     $FormLabelBonus = New-Object System.Windows.Forms.Label
-    $FormLabelBonus.Location = New-Object System.Drawing.Point(420,300)
+    $FormLabelBonus.Location = New-Object System.Drawing.Point(420,400)
     $FormLabelBonus.Size = New-Object System.Drawing.Size(350,20)
-    $FormLabelBonus.Text = "$FormLabelBonus_Text"
+    $FormLabelBonus.Text = "$script:FormLabelBonus_Text"
 
     #cree l edit box Bonus
-    $TextBoxBonus = New-Object System.Windows.Forms.TextBox
-    $TextBoxBonus.Location = New-Object System.Drawing.Point(420,320)
-    $TextBoxBonus.Size = New-Object System.Drawing.Size(350,20)
+    $script:TextBoxBonus = New-Object System.Windows.Forms.TextBox
+    $script:TextBoxBonus.Location = New-Object System.Drawing.Point(420,420)
+    $script:TextBoxBonus.Size = New-Object System.Drawing.Size(350,20)
 
     #cree le label AOE
     $FormLabelAOE = New-Object System.Windows.Forms.Label
-    $FormLabelAOE.Location = New-Object System.Drawing.Point(10,360)
+    $FormLabelAOE.Location = New-Object System.Drawing.Point(10,460)
     $FormLabelAOE.Size = New-Object System.Drawing.Size(350,20)
-    $FormLabelAOE.Text = "$FormLabelAOE_Text"
+    $FormLabelAOE.Text = "$script:FormLabelAOE_Text"
 
     #cree l edit box AOE
-    $TextBoxAOE = New-Object System.Windows.Forms.TextBox
-    $TextBoxAOE.Location = New-Object System.Drawing.Point(10,380)
-    $TextBoxAOE.Size = New-Object System.Drawing.Size(350,20)
+    $script:TextBoxAOE = New-Object System.Windows.Forms.TextBox
+    $script:TextBoxAOE.Location = New-Object System.Drawing.Point(10,480)
+    $script:TextBoxAOE.Size = New-Object System.Drawing.Size(350,20)
 
     #List de tuple (item1 = level, item2 = name) du monstre
     $myList = New-Object System.Collections.ArrayList
 
     #remplir la liste Monster
-    foreach($line in [System.IO.File]::ReadLines("$Path\name_monster.txt"))
+    foreach($line in [System.IO.File]::ReadLines("$script:Path\name_monster.txt"))
     {
         $name = $line -split { $_ -eq "=" -or $_ -eq ";" -or $_ -eq "}" }
         $myList.Add([Tuple]::Create([Int]($name[3]),$name[1])) | Out-Null
@@ -174,58 +198,49 @@ Function Init{
 
     foreach($level_name in $myList)
     {
-        $ListBoxMonster.Items.Add($level_name) | Out-Null
+        $script:ListBoxMonster.Items.Add($level_name) | Out-Null
     }
 
     #remplir la liste level
     $val = 1
     while($val -ne 121)
     {
-        $ListBoxLevel.Items.Add("$val") | Out-Null
+        $script:ListBoxLevel.Items.Add("$val") | Out-Null
         $val++
     }
 
     #ajout des elements a la boite de dialogue
-    $ListForm.Controls.Add($ButtonOk)
-    $ListForm.Controls.Add($ButtonCancel)
-    $ListForm.Controls.Add($ButtonUpdate)
-    $ListForm.Controls.Add($ButtonFR)
-    $ListForm.Controls.Add($ButtonUS)
-    $ListForm.Controls.Add($FormLabelMonster)
-    $ListForm.Controls.Add($FormLabelLevel) 
-    $ListForm.Controls.Add($FormLabelTime)
-    $ListForm.Controls.Add($FormLabelBonus)
-    $ListForm.Controls.Add($FormLabelAOE)
-    $ListForm.Controls.Add($ListBoxMonster)
-    $ListForm.Controls.Add($ListBoxLevel)
-    $ListForm.Controls.Add($TextBoxTime)
-    $ListForm.Controls.Add($TextBoxBonus)
-    $ListForm.Controls.Add($TextBoxAOE)
-
-    #retour de fonction
-    $return_list_init = $ListForm, $ListBoxMonster, $ListBoxLevel, $Path, $TextBoxTime, $TextBoxBonus, $TextBoxAOE
-    return $return_list_init
+    $script:ListForm.Controls.Add($ButtonOk)
+    $script:ListForm.Controls.Add($ButtonCancel)
+    $script:ListForm.Controls.Add($ButtonUpdate)
+    $script:ListForm.Controls.Add($ButtonFR)
+    $script:ListForm.Controls.Add($ButtonUS)
+    $script:ListForm.Controls.Add($FormLabelMonster)
+    $script:ListForm.Controls.Add($FormLabelLevel) 
+    $script:ListForm.Controls.Add($FormLabelTime)
+    $script:ListForm.Controls.Add($FormLabelBonus)
+    $script:ListForm.Controls.Add($FormLabelAOE)
+    $script:ListForm.Controls.Add($script:ListBoxMonster)
+    $script:ListForm.Controls.Add($script:ListBoxLevel)
+    $script:ListForm.Controls.Add($script:TextBoxTime)
+    $script:ListForm.Controls.Add($script:TextBoxBonus)
+    $script:ListForm.Controls.Add($script:TextBoxAOE)
 }
+
 $Tag = "FR"
-$return_list_init = Init $Tag
-$ListForm = $return_list_init[0]
-$ListBoxMonster = $return_list_init[1]
-$ListBoxLevel = $return_list_init[2]
-$Path = $return_list_init[3]
-$TextBoxTime = $return_list_init[4]
-$TextBoxBonus = $return_list_init[5]
-$TextBoxAOE = $return_list_init[6]
+Init $Tag
+
 while (1)
 {
     #display dialogue with actual load element
-    $Result = $ListForm.ShowDialog()
+    $Result = $script:ListForm.ShowDialog()
 
     #Action si bouton ok appuye
     If ($Result -eq [System.Windows.Forms.DialogResult]::OK) {
-        $SelectItemMonster = [string]$ListBoxMonster.SelectedItem
-        $SelectItemLevel = [string]$ListBoxLevel.SelectedItem
+        $SelectItemMonster = [string]$script:ListBoxMonster.SelectedItem
+        $SelectItemLevel = [string]$script:ListBoxLevel.SelectedItem
 
-        foreach($line in [System.IO.File]::ReadLines("$Path\name_monster.txt"))
+        foreach($line in [System.IO.File]::ReadLines("$script:Path_Name_Monster"))
         {
             $name = $line -split { $_ -eq "=" -or $_ -eq ";" -or $_ -eq "}" }
             $test = "("+ $name[3] + ", " + $name[1] + ")"
@@ -236,9 +251,9 @@ while (1)
         }
         if ($SelectItemMonster -ne "" -and $SelectItemLevel -ne "")
         {
-            $SelectTime = $TextBoxTime.Text
-            $SelectBonus = $TextBoxBonus.Text
-            $SelectAOE = $TextBoxAOE.Text
+            $SelectTime = $script:TextBoxTime.Text
+            $SelectBonus = $script:TextBoxBonus.Text
+            $SelectAOE = $script:TextBoxAOE.Text
             if ($SelectAOE -eq ""){$SelectAOE = 1}
             if ($SelectTime -eq ""){$SelectTime = 1}
             if ($SelectBonus -eq ""){$SelectBonus = 0}
@@ -267,7 +282,7 @@ while (1)
             $TimebeforeupHeu = [math]::Floor($TimebeforeupHeu)
             $TimebeforeupMin = [math]::Floor($TimebeforeupMin)
             $TimebeforeupSec = [math]::Floor($TimebeforeupSec)
-            [System.Windows.Forms.MessageBox]::Show( "Nombre de monstre/AOE à faire avant de up : $monsterkillbeforeup" + "`r`n" + "expérience par monstre/AOE tuer : $ExperienceMonster%" + "`r`n" + "expérience par minute : $ExperienceMonsterMinute%" + "`r`n" + "expérience par heure : $ExperienceMonsterHeure%" + "`r`n" + "Temps avant de up : $TimebeforeupHeu h $TimebeforeupMin m $TimebeforeupSec s", "$SelectItemMonster", 0)
+            [System.Windows.Forms.MessageBox]::Show( "$script:monsterkillbeforeup_Text $monsterkillbeforeup" + "`r`n" + "$script:ExperienceMonster_Text $ExperienceMonster%" + "`r`n" + "$script:ExperienceMonsterMinute_Text $ExperienceMonsterMinute%" + "`r`n" + "$script:ExperienceMonsterHeure_Text $ExperienceMonsterHeure%" + "`r`n" + "$script:Timebeforeup_Text $TimebeforeupHeu h $TimebeforeupMin m $TimebeforeupSec s", "$SelectItemMonster", 0)
             #display dialogue with actual load element
         }
         else
@@ -277,17 +292,17 @@ while (1)
     }
     Elseif ($Result -eq [System.Windows.Forms.DialogResult]::Retry) {
         [System.Windows.Forms.MessageBox]::Show( "Veuillez patienté cela peut prendre une dizaine de minutes, cliquer sur OK pour commencer", "INFO", 0)
-        $api_call = $PSScriptRoot.ToString() + "\call_api.ps1"
-        powershell -file "$api_call"
-        $return_list = Init
-        $Listform = $return_list[0]
-        $ListBoxMonster = $return_list[1]
-        $ListBoxLevel = $return_list[2]
-        $Path = $return_list[3]
-        $TextBoxTime = $return_list[4]
-        $TextBoxBonus = $return_list[5]
-        $TextBoxAOE = $return_list[6]
+        powershell -file "$script:api_call"
+        Init $Tag
         [System.Windows.Forms.MessageBox]::Show( "update des informations sur les monstres terminée", "INFO", 0) 
+    }
+    Elseif ($Result -eq [System.Windows.Forms.DialogResult]::Yes) {
+        $Tag = "FR"
+        Init $Tag
+    }
+    Elseif ($Result -eq [System.Windows.Forms.DialogResult]::No) {
+        $Tag = "US"
+        Init $Tag 
     }
     Elseif ($Result -eq [System.Windows.Forms.DialogResult]::Cancel) {
         Exit
