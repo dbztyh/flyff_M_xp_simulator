@@ -3,6 +3,8 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 # Text variable to easy change language
+$script:Tag = 1
+#Tag value : 1 = FR , 3 = US
 $script:ButtonCancel_Text = "" 
 $script:ButtonOk_Text = "" 
 $script:ButtonUpdate_Text = "" 
@@ -30,10 +32,10 @@ $script:Path_parent = $PSScriptRoot.ToString()
 $script:Path = $PSScriptRoot.ToString() + "\ressources"
 $script:api_call = $PSScriptRoot.ToString() + "\call_api.ps1"
 $script:Path_Name_Monster = $PSScriptRoot.ToString() + "\ressources\name_monster.txt"
+$script:Path_Exp_Monster = $PSScriptRoot.ToString() + "\ressources\exp_monster.txt"
 
 Function Choice_Language{
-    Param ($Tag)
-    if ($Tag -eq "US")
+    if ($script:Tag -eq 3)
     {
        $script:ButtonCancel_Text = "EXIT"
        $script:ButtonOk_Text = "OK"
@@ -68,16 +70,7 @@ Function Choice_Language{
 }
 
 Function Init{
-    Param ($Tag)
-    Choice_Language $Tag
-    if (-not ( Test-Path -Path $script:Path ))
-    {
-        mkdir $script:Path
-        powershell -file "$script:api_call"
-    }
-
-    #check if assembly file exist and remove if exist to avoid some collision
-
+    Choice_Language
 
     #Ouvre la boite de dialogue
     $script:ListForm = New-Object System.Windows.Forms.Form
@@ -185,12 +178,11 @@ Function Init{
 
     #List de tuple (item1 = level, item2 = name) du monstre
     $myList = New-Object System.Collections.ArrayList
-
     #remplir la liste Monster
     foreach($line in [System.IO.File]::ReadLines("$script:Path\name_monster.txt"))
     {
         $name = $line -split { $_ -eq "=" -or $_ -eq ";" -or $_ -eq "}" }
-        $myList.Add([Tuple]::Create([Int]($name[3]),$name[1])) | Out-Null
+        $myList.Add([Tuple]::Create([Int]($name[5]),$name[$script:Tag])) | Out-Null
        
     }
     #trier la liste
@@ -227,8 +219,13 @@ Function Init{
     $script:ListForm.Controls.Add($script:TextBoxAOE)
 }
 
-$Tag = "FR"
-Init $Tag
+#check if assembly file exist
+If ((-not(Test-Path "$script:Path_Name_Monster")) -or (-not(Test-Path "$script:Path_Exp_Monster")))
+{
+   powershell -file "$script:api_call"
+}
+
+Init
 
 while (1)
 {
@@ -239,16 +236,29 @@ while (1)
     If ($Result -eq [System.Windows.Forms.DialogResult]::OK) {
         $SelectItemMonster = [string]$script:ListBoxMonster.SelectedItem
         $SelectItemLevel = [string]$script:ListBoxLevel.SelectedItem
-
-        foreach($line in [System.IO.File]::ReadLines("$script:Path_Name_Monster"))
+        $indexline = 0
+        $indexline_bis = 0
+        foreach($line in $file_name_monster = [System.IO.File]::ReadLines("$script:Path_Name_Monster"))
         {
+            $indexline = $indexline + 1
             $name = $line -split { $_ -eq "=" -or $_ -eq ";" -or $_ -eq "}" }
-            $test = "("+ $name[3] + ", " + $name[1] + ")"
+            $test = "("+ $name[5] + ", " + $name[$script:Tag] + ")"
             if ($SelectItemMonster -eq $test)
             {
-                $ExperienceMonsterList = $name[4] -split { $_ -eq " " }
+                $indexline_bis = $indexline
             }
         }
+        $indexline_tmp = 0
+        foreach($line in $file_exp_monster = [System.IO.File]::ReadLines("$script:Path_Exp_Monster"))
+        {
+            $indexline_tmp = $indexline_tmp + 1
+            if ($indexline_bis -eq $indexline_tmp)
+            {
+                $ExperienceMonsterList = $line -split { $_ -eq " " }
+
+            }
+        }
+
         if ($SelectItemMonster -ne "" -and $SelectItemLevel -ne "")
         {
             $SelectTime = $script:TextBoxTime.Text
@@ -293,16 +303,16 @@ while (1)
     Elseif ($Result -eq [System.Windows.Forms.DialogResult]::Retry) {
         [System.Windows.Forms.MessageBox]::Show( "Veuillez patienté cela peut prendre une dizaine de minutes, cliquer sur OK pour commencer", "INFO", 0)
         powershell -file "$script:api_call"
-        Init $Tag
+        Init
         [System.Windows.Forms.MessageBox]::Show( "update des informations sur les monstres terminée", "INFO", 0) 
     }
     Elseif ($Result -eq [System.Windows.Forms.DialogResult]::Yes) {
-        $Tag = "FR"
-        Init $Tag
+        $script:Tag = 1
+        Init
     }
     Elseif ($Result -eq [System.Windows.Forms.DialogResult]::No) {
-        $Tag = "US"
-        Init $Tag 
+        $script:Tag = 3
+        Init
     }
     Elseif ($Result -eq [System.Windows.Forms.DialogResult]::Cancel) {
         Exit
