@@ -2,6 +2,9 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
+#min - max gold
+#location mobs
+
 # Text variable to easy change language
 $script:Tag = 1
 #Tag value : 1 = FR , 3 = US
@@ -18,6 +21,12 @@ $script:monsterkillbeforeup_Text = ""
 $script:ExperienceMonsterMinute_Text = ""
 $script:ExperienceMonsterHeure_Text = ""
 $script:Timebeforeup_Text = ""
+$script:MaxAttack_Text = ""
+$script:MinAttack_Text = ""
+$script:hp_Text = ""
+$script:element_Text = ""
+$script:update_Text = ""
+$script:update_end_Text = ""
 
 # Form variable
 $script:ListForm = $null
@@ -33,6 +42,8 @@ $script:Path = $PSScriptRoot.ToString() + "\ressources"
 $script:api_call = $PSScriptRoot.ToString() + "\call_api.ps1"
 $script:Path_Name_Monster = $PSScriptRoot.ToString() + "\ressources\name_monster.txt"
 $script:Path_Exp_Monster = $PSScriptRoot.ToString() + "\ressources\exp_monster.txt"
+$script:Path_Location_Monster = $PSScriptRoot.ToString() + "\ressources\location_monster.txt"
+$script:Path_Icon_Monster = $PSScriptRoot.ToString() + "\ressources\icon_monster.txt"
 
 Function Choice_Language{
     if ($script:Tag -eq 3)
@@ -50,6 +61,12 @@ Function Choice_Language{
        $script:ExperienceMonsterMinute_Text = "experience by minute : "
        $script:ExperienceMonsterHeure_Text = "experience by hour : "
        $script:Timebeforeup_Text = "Time before up : "
+       $script:MaxAttack_Text = "Max Attack : "
+       $script:MinAttack_Text = "Min Attack : "
+       $script:hp_Text = "hp : "
+       $script:element_Text = "Element : "
+       $script:update_Text = "Please wait, this loading during 1 minute max, click on OK to begin"
+       $script:update_end_Text = "Update information on monsters are finish."
     }
     else
     {
@@ -66,6 +83,12 @@ Function Choice_Language{
        $script:ExperienceMonsterMinute_Text = "expérience par minute : "
        $script:ExperienceMonsterHeure_Text = "expérience par heure : "
        $script:Timebeforeup_Text = "Temps avant de up : "
+       $script:MaxAttack_Text = "Attaque Max : "
+       $script:MinAttack_Text = "Attaque Min : " 
+       $script:hp_Text = "pv : "
+       $script:element_Text = "Element : "
+       $script:update_Text = "Veuillez patienté cela peut prendre jusqu'a une minutes, cliquer sur OK pour commencer"
+       $script:update_end_Text = "Mise à jour des informations sur les monstres terminée"
     }
 }
 
@@ -77,7 +100,34 @@ Function Init{
     $script:ListForm.Text = "Flyff_M_xp_simulator"
     $script:ListForm.Size = New-Object System.Drawing.Size(800,600)
     $script:ListForm.StartPosition = "CenterScreen"
+    $script:ListForm.BackColor = "#303030"
     $script:ListForm.TopMost = $True
+
+    #Ouvre la boite de dialogue apres avoir appuyer button OK
+    $script:ListFormOK = New-Object System.Windows.Forms.Form
+    $script:ListFormOK.Text = "Flyff_M_xp_simulator"
+    $script:ListFormOK.Size = New-Object System.Drawing.Size(800,600)
+    $script:ListFormOK.StartPosition = "CenterScreen"
+    $script:ListFormOK.BackColor = "#303030"
+    $script:ListFormOK.TopMost = $True
+
+    
+    #cree le label exp monstre
+    $script:FormLabelExp = New-Object System.Windows.Forms.Label
+    $script:FormLabelExp.Location = New-Object System.Drawing.Point(10,10)
+    $script:FormLabelExp.Size = New-Object System.Drawing.Size(350,150)
+    $script:FormLabelExp.ForeColor = "#FFFFFF"
+    $script:FormLabelExp.Text = ""
+
+    #cree le label info monstre
+    $script:FormLabelInfo = New-Object System.Windows.Forms.Label
+    $script:FormLabelInfo.Location = New-Object System.Drawing.Point(410,10)
+    $script:FormLabelInfo.Size = New-Object System.Drawing.Size(350,100)
+    $script:FormLabelInfo.ForeColor = "#FFFFFF"
+    $script:FormLabelInfo.Text = ""
+
+    $script:pictureBoxMonster = new-object Windows.Forms.PictureBox
+    $script:pictureBoxMonster.Location = New-Object System.Drawing.Size(410,120)
 
     #Cancel button
     $ButtonCancel = New-Object System.Windows.Forms.Button
@@ -123,6 +173,7 @@ Function Init{
     $FormLabelMonster = New-Object System.Windows.Forms.Label
     $FormLabelMonster.Location = New-Object System.Drawing.Point(10,70)
     $FormLabelMonster.Size = New-Object System.Drawing.Size(350,20)
+    $FormLabelMonster.ForeColor = "#FFFFFF"
     $FormLabelMonster.Text = "$script:FormLabelMonster_Text"
 
     #cree la liste Monster
@@ -135,6 +186,7 @@ Function Init{
     $FormLabelLevel = New-Object System.Windows.Forms.Label
     $FormLabelLevel.Location = New-Object System.Drawing.Point(420,70)
     $FormLabelLevel.Size = New-Object System.Drawing.Size(350,20)
+    $FormLabelLevel.ForeColor = "#FFFFFF"
     $FormLabelLevel.Text = "$script:FormLabelLevel_Text"
 
     #cree la liste Level
@@ -147,6 +199,7 @@ Function Init{
     $FormLabelTime = New-Object System.Windows.Forms.Label
     $FormLabelTime.Location = New-Object System.Drawing.Point(10,400)
     $FormLabelTime.Size = New-Object System.Drawing.Size(350,20)
+    $FormLabelTime.ForeColor = "#FFFFFF"
     $FormLabelTime.Text = "$script:FormLabelTime_Text"
 
     #cree l edit box Time
@@ -158,6 +211,7 @@ Function Init{
     $FormLabelBonus = New-Object System.Windows.Forms.Label
     $FormLabelBonus.Location = New-Object System.Drawing.Point(420,400)
     $FormLabelBonus.Size = New-Object System.Drawing.Size(350,20)
+    $FormLabelBonus.ForeColor = "#FFFFFF"
     $FormLabelBonus.Text = "$script:FormLabelBonus_Text"
 
     #cree l edit box Bonus
@@ -169,6 +223,7 @@ Function Init{
     $FormLabelAOE = New-Object System.Windows.Forms.Label
     $FormLabelAOE.Location = New-Object System.Drawing.Point(10,460)
     $FormLabelAOE.Size = New-Object System.Drawing.Size(350,20)
+    $FormLabelAOE.ForeColor = "#FFFFFF"
     $FormLabelAOE.Text = "$script:FormLabelAOE_Text"
 
     #cree l edit box AOE
@@ -245,6 +300,11 @@ while (1)
             $test = "("+ $name[5] + ", " + $name[$script:Tag] + ")"
             if ($SelectItemMonster -eq $test)
             {
+                $script:minAttack = $name[7]
+                $script:maxAttack = $name[9]
+                $script:hp = $name[11]
+                $script:element = $name[13]
+                $script:icon = $name[15]
                 $indexline_bis = $indexline
             }
         }
@@ -258,7 +318,26 @@ while (1)
 
             }
         }
-
+        $indexline_tmp = 0
+        foreach($line in $file_exp_monster = [System.IO.File]::ReadLines("$script:Path_Location_Monster"))
+        {
+            $indexline_tmp = $indexline_tmp + 1
+            if (($indexline_bis + 3) -eq $indexline_tmp)
+            {
+                $LocationMonster = $line -split { $_ -eq " " }
+                Write-Output("location : $LocationMonster")
+            }
+        }
+        $indexline_tmp = 0
+        foreach($line in $file_exp_monster = [System.IO.File]::ReadLines("$script:Path_Icon_Monster"))
+        {
+            $indexline_tmp = $indexline_tmp + 1
+            if ($indexline_bis -eq $indexline_tmp)
+            {
+                $icon_name_split = $line -split { $_ -eq "=" -or $_ -eq "}" }
+                $icon_name = $icon_name_split[1] 
+            }
+        }
         if ($SelectItemMonster -ne "" -and $SelectItemLevel -ne "")
         {
             $SelectTime = $script:TextBoxTime.Text
@@ -292,7 +371,19 @@ while (1)
             $TimebeforeupHeu = [math]::Floor($TimebeforeupHeu)
             $TimebeforeupMin = [math]::Floor($TimebeforeupMin)
             $TimebeforeupSec = [math]::Floor($TimebeforeupSec)
-            [System.Windows.Forms.MessageBox]::Show( "$script:monsterkillbeforeup_Text $monsterkillbeforeup" + "`r`n" + "$script:ExperienceMonster_Text $ExperienceMonster%" + "`r`n" + "$script:ExperienceMonsterMinute_Text $ExperienceMonsterMinute%" + "`r`n" + "$script:ExperienceMonsterHeure_Text $ExperienceMonsterHeure%" + "`r`n" + "$script:Timebeforeup_Text $TimebeforeupHeu h $TimebeforeupMin m $TimebeforeupSec s", "$SelectItemMonster", 0)
+
+            $img = [System.Drawing.Image]::Fromfile("$script:Path\$icon_name")
+            #$script:pictureBoxMonster.Size = New-Object System.Drawing.Size(350,250)
+            $script:pictureBoxMonster.Size = New-Object System.Drawing.Size($img.Width,$img.Height)
+            $script:pictureBoxMonster.Image = $img
+            $script:FormLabelExp.Text = "$script:monsterkillbeforeup_Text $monsterkillbeforeup" + "`r`n" + "$script:ExperienceMonster_Text $ExperienceMonster%" + "`r`n" + "$script:ExperienceMonsterMinute_Text $ExperienceMonsterMinute%" + "`r`n" + "$script:ExperienceMonsterHeure_Text $ExperienceMonsterHeure%" + "`r`n" + "$script:Timebeforeup_Text $TimebeforeupHeu h $TimebeforeupMin m $TimebeforeupSec s"
+            $script:FormLabelInfo.Text = "$script:hp_Text $script:hp" + "`r`n" + "$script:MaxAttack_Text $script:maxAttack" + "`r`n" + "$script:MinAttack_Text $script:minAttack" + "`r`n" + "$script:element_Text $script:element"
+            $script:ListFormOK.Controls.Add($script:FormLabelExp)
+            $script:ListFormOK.Controls.Add($script:FormLabelInfo)
+            $script:ListFormOK.Controls.Add($script:pictureBoxMonster)
+            $script:ListFormOK.ShowDialog()
+            
+            #[System.Windows.Forms.MessageBox]::Show( "$script:monsterkillbeforeup_Text $monsterkillbeforeup" + "`r`n" + "$script:ExperienceMonster_Text $ExperienceMonster%" + "`r`n" + "$script:ExperienceMonsterMinute_Text $ExperienceMonsterMinute%" + "`r`n" + "$script:ExperienceMonsterHeure_Text $ExperienceMonsterHeure%" + "`r`n" + "$script:Timebeforeup_Text $TimebeforeupHeu h $TimebeforeupMin m $TimebeforeupSec s", "$SelectItemMonster", 0)
             #display dialogue with actual load element
         }
         else
@@ -301,10 +392,10 @@ while (1)
         }       
     }
     Elseif ($Result -eq [System.Windows.Forms.DialogResult]::Retry) {
-        [System.Windows.Forms.MessageBox]::Show( "Veuillez patienté cela peut prendre une dizaine de minutes, cliquer sur OK pour commencer", "INFO", 0)
+        [System.Windows.Forms.MessageBox]::Show( "$script:update_Text", "INFO", 0)
         powershell -file "$script:api_call"
         Init
-        [System.Windows.Forms.MessageBox]::Show( "update des informations sur les monstres terminée", "INFO", 0) 
+        [System.Windows.Forms.MessageBox]::Show( "$script:update_end_Text", "INFO", 0) 
     }
     Elseif ($Result -eq [System.Windows.Forms.DialogResult]::Yes) {
         $script:Tag = 1
