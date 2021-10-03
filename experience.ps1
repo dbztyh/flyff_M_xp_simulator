@@ -114,20 +114,29 @@ Function Init{
     
     #cree le label exp monstre
     $script:FormLabelExp = New-Object System.Windows.Forms.Label
-    $script:FormLabelExp.Location = New-Object System.Drawing.Point(10,10)
-    $script:FormLabelExp.Size = New-Object System.Drawing.Size(350,150)
+    $script:FormLabelExp.Location = New-Object System.Drawing.Point(50,10)
+    $script:FormLabelExp.Size = New-Object System.Drawing.Size(350,100)
     $script:FormLabelExp.ForeColor = "#FFFFFF"
     $script:FormLabelExp.Text = ""
 
     #cree le label info monstre
     $script:FormLabelInfo = New-Object System.Windows.Forms.Label
-    $script:FormLabelInfo.Location = New-Object System.Drawing.Point(410,10)
-    $script:FormLabelInfo.Size = New-Object System.Drawing.Size(350,100)
+    $script:FormLabelInfo.Location = New-Object System.Drawing.Point(450,10)
+    $script:FormLabelInfo.Size = New-Object System.Drawing.Size(300,100)
     $script:FormLabelInfo.ForeColor = "#FFFFFF"
     $script:FormLabelInfo.Text = ""
 
+    #picture box of monster
     $script:pictureBoxMonster = new-object Windows.Forms.PictureBox
-    $script:pictureBoxMonster.Location = New-Object System.Drawing.Size(410,120)
+    $script:pictureBoxMonster.Location = New-Object System.Drawing.Size(450,120)
+
+    #picture box of map
+    $script:pictureBoxMap = new-object Windows.Forms.PictureBox
+    $script:pictureBoxMap.Location = New-Object System.Drawing.Size(50,120)
+
+    #picture box red point
+    $script:pictureBoxRedPoint = new-object Windows.Forms.PictureBox
+    $script:pictureBoxRedPoint.Location = New-Object System.Drawing.Size(70,150)
 
     #Cancel button
     $ButtonCancel = New-Object System.Windows.Forms.Button
@@ -304,7 +313,7 @@ while (1)
                 $script:maxAttack = $name[9]
                 $script:hp = $name[11]
                 $script:element = $name[13]
-                $script:icon = $name[15]
+                $script:world = $name[15]
                 $indexline_bis = $indexline
             }
         }
@@ -324,8 +333,13 @@ while (1)
             $indexline_tmp = $indexline_tmp + 1
             if (($indexline_bis + 3) -eq $indexline_tmp)
             {
-                $LocationMonster = $line -split { $_ -eq " " }
-                Write-Output("location : $LocationMonster")
+                $LocationMonster = $line -split { $_ -eq "=" -or $_ -eq ";" -or $_ -eq "}" }
+                $XLocationMonster = $LocationMonster[3]
+                $ZLocationMonster = $LocationMonster[7]
+                $XLocationMonster = $XLocationMonster.Replace(',', '.')
+                $ZLocationMonster = $ZLocationMonster.Replace(',', '.')
+                Write-Output("Xlocation : $XLocationMonster")
+                Write-Output("Zlocation : $ZLocationMonster")
             }
         }
         $indexline_tmp = 0
@@ -372,15 +386,52 @@ while (1)
             $TimebeforeupMin = [math]::Floor($TimebeforeupMin)
             $TimebeforeupSec = [math]::Floor($TimebeforeupSec)
 
+            $id_wd = Get-Content "$script:Path\maps\world_monsters_list.txt" | ConvertFrom-Json
+            $id_wd = $id_wd | where { $_.id -eq "$script:world" }
+
+            $height_map = ([int]$id_wd.height) / 512
+            #maps calcul
+            $Xtile = $XLocationMonster / 512
+            $Ytile = ($height_map - ($ZLocationMonster / 512))
+            $rest_Xtile = $XLocationMonster % 512
+            $rest_Ytile = $ZLocationMonster % 512
+            $Xtile = [math]::Floor($Xtile)
+            $Ytile = [math]::Floor($Ytile)
+            Write-Output("Xtile : $Xtile")
+            Write-Output("Ytile : $Ytile")
+            Write-Output("rest_Xtile : $rest_Xtile")
+            Write-Output("rest_Ytile : $rest_Ytile")
+            #Invoke-RestMethod -Uri "https://flyff-api.sniegu.fr/image/world/wdmadrigal$Xtile-$Ytile-0.png" -OutFile $script:Path\current-tile.png
+
             $img = [System.Drawing.Image]::Fromfile("$script:Path\$icon_name")
-            #$script:pictureBoxMonster.Size = New-Object System.Drawing.Size(350,250)
-            $script:pictureBoxMonster.Size = New-Object System.Drawing.Size($img.Width,$img.Height)
+            $newWidth = [int] ($img.Width /2)
+            $newHeight = [int] ($img.Height / 2)
+            #$bmpResized = New-Object System.Drawing.Bitmap($newWidth, $newHeight)
+            #$graph = [System.Drawing.Graphics]::FromImage($bmpResized)
+            #$graph.DrawImage($img, 0, 0, $newWidth, $newHeight)
+
+            #img up size
+            $script:pictureBoxMonster.Size = New-Object System.Drawing.Size(350,350)
+            #$script:pictureBoxMonster.Size = New-Object System.Drawing.Size($img.Width,$img.Height)
             $script:pictureBoxMonster.Image = $img
+            
+            $string_img_Map = "$script:Path\maps\" + $id_wd.tileName + "\tile$Xtile-$Ytile.png"
+            $img_Map = [System.Drawing.Image]::Fromfile($string_img_Map)
+            $script:pictureBoxMap.Size = New-Object System.Drawing.Size($img_Map.Width,$img_Map.Height)
+            $script:pictureBoxMap.Image = $img_Map
+
+            $img_RedPoint = [System.Drawing.Image]::Fromfile("$Path_parent\point.png")
+            $script:pictureBoxRedPoint.Size = New-Object System.Drawing.Size(40,40)
+            $script:pictureBoxRedPoint.Image = $img_RedPoint
+
             $script:FormLabelExp.Text = "$script:monsterkillbeforeup_Text $monsterkillbeforeup" + "`r`n" + "$script:ExperienceMonster_Text $ExperienceMonster%" + "`r`n" + "$script:ExperienceMonsterMinute_Text $ExperienceMonsterMinute%" + "`r`n" + "$script:ExperienceMonsterHeure_Text $ExperienceMonsterHeure%" + "`r`n" + "$script:Timebeforeup_Text $TimebeforeupHeu h $TimebeforeupMin m $TimebeforeupSec s"
             $script:FormLabelInfo.Text = "$script:hp_Text $script:hp" + "`r`n" + "$script:MaxAttack_Text $script:maxAttack" + "`r`n" + "$script:MinAttack_Text $script:minAttack" + "`r`n" + "$script:element_Text $script:element"
+            
             $script:ListFormOK.Controls.Add($script:FormLabelExp)
             $script:ListFormOK.Controls.Add($script:FormLabelInfo)
             $script:ListFormOK.Controls.Add($script:pictureBoxMonster)
+            #$script:ListFormOK.Controls.Add($script:pictureBoxRedPoint)
+            $script:ListFormOK.Controls.Add($script:pictureBoxMap)
             $script:ListFormOK.ShowDialog()
             
             #[System.Windows.Forms.MessageBox]::Show( "$script:monsterkillbeforeup_Text $monsterkillbeforeup" + "`r`n" + "$script:ExperienceMonster_Text $ExperienceMonster%" + "`r`n" + "$script:ExperienceMonsterMinute_Text $ExperienceMonsterMinute%" + "`r`n" + "$script:ExperienceMonsterHeure_Text $ExperienceMonsterHeure%" + "`r`n" + "$script:Timebeforeup_Text $TimebeforeupHeu h $TimebeforeupMin m $TimebeforeupSec s", "$SelectItemMonster", 0)
