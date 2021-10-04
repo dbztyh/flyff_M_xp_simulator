@@ -1,4 +1,5 @@
 ﻿#Add some modules
+Add-Type -AssemblyName System
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -136,7 +137,6 @@ Function Init{
 
     #picture box red point
     $script:pictureBoxRedPoint = new-object Windows.Forms.PictureBox
-    $script:pictureBoxRedPoint.Location = New-Object System.Drawing.Size(70,150)
 
     #Cancel button
     $ButtonCancel = New-Object System.Windows.Forms.Button
@@ -393,8 +393,8 @@ while (1)
             #maps calcul
             $Xtile = $XLocationMonster / 512
             $Ytile = ($height_map - ($ZLocationMonster / 512))
-            $rest_Xtile = $XLocationMonster % 512
-            $rest_Ytile = $ZLocationMonster % 512
+            $rest_Xtile = 50 + ($XLocationMonster % 512) / 2
+            $rest_Ytile = 120 + 256 - ($ZLocationMonster % 512) / 2
             $Xtile = [math]::Floor($Xtile)
             $Ytile = [math]::Floor($Ytile)
             Write-Output("Xtile : $Xtile")
@@ -420,8 +420,9 @@ while (1)
             $script:pictureBoxMap.Size = New-Object System.Drawing.Size($img_Map.Width,$img_Map.Height)
             $script:pictureBoxMap.Image = $img_Map
 
-            $img_RedPoint = [System.Drawing.Image]::Fromfile("$Path_parent\point.png")
-            $script:pictureBoxRedPoint.Size = New-Object System.Drawing.Size(40,40)
+            $img_RedPoint = [System.Drawing.Image]::Fromfile("$script:Path_parent\point5.png")
+            $script:pictureBoxRedPoint.Location = New-Object System.Drawing.Size($rest_Xtile,$rest_Ytile)
+            $script:pictureBoxRedPoint.Size = New-Object System.Drawing.Size(20,20)
             $script:pictureBoxRedPoint.Image = $img_RedPoint
 
             $script:FormLabelExp.Text = "$script:monsterkillbeforeup_Text $monsterkillbeforeup" + "`r`n" + "$script:ExperienceMonster_Text $ExperienceMonster%" + "`r`n" + "$script:ExperienceMonsterMinute_Text $ExperienceMonsterMinute%" + "`r`n" + "$script:ExperienceMonsterHeure_Text $ExperienceMonsterHeure%" + "`r`n" + "$script:Timebeforeup_Text $TimebeforeupHeu h $TimebeforeupMin m $TimebeforeupSec s"
@@ -430,7 +431,7 @@ while (1)
             $script:ListFormOK.Controls.Add($script:FormLabelExp)
             $script:ListFormOK.Controls.Add($script:FormLabelInfo)
             $script:ListFormOK.Controls.Add($script:pictureBoxMonster)
-            #$script:ListFormOK.Controls.Add($script:pictureBoxRedPoint)
+            $script:ListFormOK.Controls.Add($script:pictureBoxRedPoint)
             $script:ListFormOK.Controls.Add($script:pictureBoxMap)
             $script:ListFormOK.ShowDialog()
             

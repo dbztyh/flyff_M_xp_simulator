@@ -20,10 +20,8 @@ Invoke-RestMethod -Uri "https://flyff-api.sniegu.fr/monster/$string_list_monster
 
 
 #Get content of file and convert in 2 assembly file with needed fields
-
 $info_monster = (Get-Content "$ressources\monsters_list.txt") | ConvertFrom-Json
-#$info_monster = $info_monster | Out-String | ConvertFrom-Json
-#$info_monster2 = $info_monster | Out-String | ConvertFrom-Json
+
 
 $experience_monster = $info_monster | select experienceTable
 $experience_monster = $experience_monster | Foreach {"$($_.experienceTable)"}
@@ -32,15 +30,11 @@ $experience_monster = $experience_monster | Out-String -Stream
 $NameAndExp = $info_monster |  Select-Object -Property @{Name="name_fr"; Expression = {$_.name.fr}}, @{Name="name_en"; Expression = {$_.name.en}},level,minAttack,maxAttack,hp,element, @{Name="world"; Expression = {$_.location.world}}
 $icon_monster = $info_monster | Select-Object icon
 Add-Content "$ressources\icon_monster.txt" $icon_monster
-#Invoke-RestMethod -Uri "https://flyff-api.sniegu.fr/image/monster/"
-#, location
 
-#$attacks_monster = $info_monster | select attacks
 foreach($line in [System.IO.File]::ReadLines("$ressources\icon_monster.txt"))
 {
     $icon_name_split = $line -split { $_ -eq "=" -or $_ -eq "}" }
     $icon_name = $icon_name_split[1]
-    #Write-Output("$icon_name")
     if ( -not (Test-Path "$ressources\$icon_name"))
     {
         Write-Output("$ressources\$icon_name")
@@ -62,9 +56,6 @@ $string_list_world = Get-Content "$ressources\world_monsters.txt"
 $string_list_world = $string_list_world.Trim([char]0x005b, [char]0x005d) # char '[' and ']'
 Invoke-RestMethod -Uri "https://flyff-api.sniegu.fr/world/$string_list_world" -Outfile "$ressources\maps\world_monsters_list.txt"
 sleep -Seconds 0.2
-
-#$id_tilename = Get-Content "$ressources\maps\world_monsters_list.txt" | ConvertFrom-Json | Select-Object -Property @{Name="id"; Expression = {$_.id}}, @{Name="tileName"; Expression = {$_.tileName}}
-#Add-Content "$ressources\maps\id_tilename.txt" $id_tilename
 
 $tilename_world = Get-Content "$ressources\maps\world_monsters_list.txt" | ConvertFrom-Json | foreach {"$($_.tileName)"}
 $tilename_world = $tilename_world.split(" ");
