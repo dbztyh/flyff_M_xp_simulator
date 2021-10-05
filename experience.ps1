@@ -107,7 +107,7 @@ Function Init{
     #Ouvre la boite de dialogue apres avoir appuyer button OK
     $script:ListFormOK = New-Object System.Windows.Forms.Form
     $script:ListFormOK.Text = "Flyff_M_xp_simulator"
-    $script:ListFormOK.Size = New-Object System.Drawing.Size(800,600)
+    $script:ListFormOK.Size = New-Object System.Drawing.Size(1200,850)
     $script:ListFormOK.StartPosition = "CenterScreen"
     $script:ListFormOK.BackColor = "#303030"
     $script:ListFormOK.TopMost = $True
@@ -115,25 +115,57 @@ Function Init{
     
     #cree le label exp monstre
     $script:FormLabelExp = New-Object System.Windows.Forms.Label
-    $script:FormLabelExp.Location = New-Object System.Drawing.Point(50,10)
+    $script:FormLabelExp.Location = New-Object System.Drawing.Point(800,10)
     $script:FormLabelExp.Size = New-Object System.Drawing.Size(350,100)
     $script:FormLabelExp.ForeColor = "#FFFFFF"
     $script:FormLabelExp.Text = ""
 
     #cree le label info monstre
     $script:FormLabelInfo = New-Object System.Windows.Forms.Label
-    $script:FormLabelInfo.Location = New-Object System.Drawing.Point(450,10)
+    $script:FormLabelInfo.Location = New-Object System.Drawing.Point(800,110)
     $script:FormLabelInfo.Size = New-Object System.Drawing.Size(300,100)
     $script:FormLabelInfo.ForeColor = "#FFFFFF"
     $script:FormLabelInfo.Text = ""
 
     #picture box of monster
     $script:pictureBoxMonster = new-object Windows.Forms.PictureBox
-    $script:pictureBoxMonster.Location = New-Object System.Drawing.Size(450,120)
+    $script:pictureBoxMonster.Location = New-Object System.Drawing.Size(800,220)
 
-    #picture box of map
+    #picture box of map 
     $script:pictureBoxMap = new-object Windows.Forms.PictureBox
-    $script:pictureBoxMap.Location = New-Object System.Drawing.Size(50,120)
+    $script:pictureBoxMap.Location = New-Object System.Drawing.Size(266,266)
+
+    #picture box of map T
+    $script:pictureBoxMapT = new-object Windows.Forms.PictureBox
+    $script:pictureBoxMapT.Location = New-Object System.Drawing.Size(266,10)
+
+    #picture box of map B
+    $script:pictureBoxMapB = new-object Windows.Forms.PictureBox
+    $script:pictureBoxMapB.Location = New-Object System.Drawing.Size(266,522)
+
+    #picture box of map E
+    $script:pictureBoxMapE = new-object Windows.Forms.PictureBox
+    $script:pictureBoxMapE.Location = New-Object System.Drawing.Size(522,266)
+
+    #picture box of map W
+    $script:pictureBoxMapW = new-object Windows.Forms.PictureBox
+    $script:pictureBoxMapW.Location = New-Object System.Drawing.Size(10,266)
+
+    #picture box of map TE
+    $script:pictureBoxMapTE = new-object Windows.Forms.PictureBox
+    $script:pictureBoxMapTE.Location = New-Object System.Drawing.Size(522,10)
+
+    #picture box of map TW
+    $script:pictureBoxMapTW = new-object Windows.Forms.PictureBox
+    $script:pictureBoxMapTW.Location = New-Object System.Drawing.Size(10,10)
+
+    #picture box of map BE
+    $script:pictureBoxMapBE = new-object Windows.Forms.PictureBox
+    $script:pictureBoxMapBE.Location = New-Object System.Drawing.Size(522,522)
+
+    #picture box of map BW
+    $script:pictureBoxMapBW = new-object Windows.Forms.PictureBox
+    $script:pictureBoxMapBW.Location = New-Object System.Drawing.Size(10,522)
 
     #picture box red point
     $script:pictureBoxRedPoint = new-object Windows.Forms.PictureBox
@@ -393,8 +425,8 @@ while (1)
             #maps calcul
             $Xtile = $XLocationMonster / 512
             $Ytile = ($height_map - ($ZLocationMonster / 512))
-            $rest_Xtile = 50 + ($XLocationMonster % 512) / 2
-            $rest_Ytile = 120 + 256 - ($ZLocationMonster % 512) / 2
+            $rest_Xtile = (266 + ($XLocationMonster % 512) / 2) - 10
+            $rest_Ytile = (266 + 256 - ($ZLocationMonster % 512) / 2) - 10
             $Xtile = [math]::Floor($Xtile)
             $Ytile = [math]::Floor($Ytile)
             Write-Output("Xtile : $Xtile")
@@ -416,9 +448,76 @@ while (1)
             $script:pictureBoxMonster.Image = $img
             
             $string_img_Map = "$script:Path\maps\" + $id_wd.tileName + "\tile$Xtile-$Ytile.png"
-            $img_Map = [System.Drawing.Image]::Fromfile($string_img_Map)
+            If (Test-Path "$string_img_Map")
+            {$img_Map = [System.Drawing.Image]::Fromfile($string_img_Map)}
+            else{$img_Map = [System.Drawing.Image]::Fromfile("$script:Path_parent\nothing1.png")}
             $script:pictureBoxMap.Size = New-Object System.Drawing.Size($img_Map.Width,$img_Map.Height)
             $script:pictureBoxMap.Image = $img_Map
+
+            $Ytile = $Ytile - 1
+            $string_img_MapT = "$script:Path\maps\" + $id_wd.tileName + "\tile$Xtile-$Ytile.png"
+            If (Test-Path "$string_img_MapT")
+            {$img_MapT = [System.Drawing.Image]::Fromfile($string_img_MapT)}
+            else{$img_MapT = [System.Drawing.Image]::Fromfile("$script:Path_parent\nothing1.png")}
+                $script:pictureBoxMapT.Size = New-Object System.Drawing.Size($img_MapT.Width,$img_MapT.Height)
+                $script:pictureBoxMapT.Image = $img_MapT
+
+            $Ytile = $Ytile + 2
+            $string_img_MapB = "$script:Path\maps\" + $id_wd.tileName + "\tile$Xtile-$Ytile.png"
+            If (Test-Path "$string_img_MapB")
+            {$img_MapB = [System.Drawing.Image]::Fromfile($string_img_MapB)}
+            else{$img_MapB = [System.Drawing.Image]::Fromfile("$script:Path_parent\nothing1.png")}
+            $script:pictureBoxMapB.Size = New-Object System.Drawing.Size($img_MapB.Width,$img_MapB.Height)
+            $script:pictureBoxMapB.Image = $img_MapB
+
+            $Ytile = $Ytile - 1
+            $Xtile = $Xtile + 1
+            $string_img_MapE = "$script:Path\maps\" + $id_wd.tileName + "\tile$Xtile-$Ytile.png"
+            If (Test-Path "$string_img_MapE")
+            {$img_MapE = [System.Drawing.Image]::Fromfile($string_img_MapE)}
+            else{$img_MapE = [System.Drawing.Image]::Fromfile("$script:Path_parent\nothing1.png")}
+            $script:pictureBoxMapE.Size = New-Object System.Drawing.Size($img_MapE.Width,$img_MapE.Height)
+            $script:pictureBoxMapE.Image = $img_MapE
+
+            $Xtile = $Xtile - 2
+            $string_img_MapW = "$script:Path\maps\" + $id_wd.tileName + "\tile$Xtile-$Ytile.png"
+            If (Test-Path "$string_img_MapW")
+            {$img_MapW = [System.Drawing.Image]::Fromfile($string_img_MapW)}
+            else{$img_MapW = [System.Drawing.Image]::Fromfile("$script:Path_parent\nothing1.png")}
+            $script:pictureBoxMapW.Size = New-Object System.Drawing.Size($img_MapW.Width,$img_MapW.Height)
+            $script:pictureBoxMapW.Image = $img_MapW
+
+            $Ytile = $Ytile - 1
+            $string_img_MapTW = "$script:Path\maps\" + $id_wd.tileName + "\tile$Xtile-$Ytile.png"
+            If (Test-Path "$string_img_MapTW")
+            {$img_MapTW = [System.Drawing.Image]::Fromfile($string_img_MapTW)}
+            else{$img_MapTW = [System.Drawing.Image]::Fromfile("$script:Path_parent\nothing1.png")}
+            $script:pictureBoxMapTW.Size = New-Object System.Drawing.Size($img_MapTW.Width,$img_MapTW.Height)
+            $script:pictureBoxMapTW.Image = $img_MapTW
+
+            $Xtile = $Xtile + 2
+            $string_img_MapTE = "$script:Path\maps\" + $id_wd.tileName + "\tile$Xtile-$Ytile.png"
+            If (Test-Path "$string_img_MapTE")
+            {$img_MapTE = [System.Drawing.Image]::Fromfile($string_img_MapTE)}
+            else{$img_MapTE = [System.Drawing.Image]::Fromfile("$script:Path_parent\nothing1.png")}
+            $script:pictureBoxMapTE.Size = New-Object System.Drawing.Size($img_MapTE.Width,$img_MapTE.Height)
+            $script:pictureBoxMapTE.Image = $img_MapTE
+
+            $Ytile = $Ytile + 2
+            $string_img_MapBE = "$script:Path\maps\" + $id_wd.tileName + "\tile$Xtile-$Ytile.png"
+            If (Test-Path "$string_img_MapBE")
+            {$img_MapBE = [System.Drawing.Image]::Fromfile($string_img_MapBE)}
+            else{$img_MapBE = [System.Drawing.Image]::Fromfile("$script:Path_parent\nothing1.png")}
+            $script:pictureBoxMapBE.Size = New-Object System.Drawing.Size($img_MapBE.Width,$img_MapBE.Height)
+            $script:pictureBoxMapBE.Image = $img_MapBE
+
+            $Xtile = $Xtile - 2
+            $string_img_MapBW = "$script:Path\maps\" + $id_wd.tileName + "\tile$Xtile-$Ytile.png"
+            If (Test-Path "$string_img_MapBW")
+            {$img_MapBW = [System.Drawing.Image]::Fromfile($string_img_MapBW)}
+            else{$img_MapBW = [System.Drawing.Image]::Fromfile("$script:Path_parent\nothing1.png")}
+            $script:pictureBoxMapBW.Size = New-Object System.Drawing.Size($img_MapBW.Width,$img_MapBW.Height)
+            $script:pictureBoxMapBW.Image = $img_MapBW
 
             $img_RedPoint = [System.Drawing.Image]::Fromfile("$script:Path_parent\point5.png")
             $script:pictureBoxRedPoint.Location = New-Object System.Drawing.Size($rest_Xtile,$rest_Ytile)
@@ -428,11 +527,23 @@ while (1)
             $script:FormLabelExp.Text = "$script:monsterkillbeforeup_Text $monsterkillbeforeup" + "`r`n" + "$script:ExperienceMonster_Text $ExperienceMonster%" + "`r`n" + "$script:ExperienceMonsterMinute_Text $ExperienceMonsterMinute%" + "`r`n" + "$script:ExperienceMonsterHeure_Text $ExperienceMonsterHeure%" + "`r`n" + "$script:Timebeforeup_Text $TimebeforeupHeu h $TimebeforeupMin m $TimebeforeupSec s"
             $script:FormLabelInfo.Text = "$script:hp_Text $script:hp" + "`r`n" + "$script:MaxAttack_Text $script:maxAttack" + "`r`n" + "$script:MinAttack_Text $script:minAttack" + "`r`n" + "$script:element_Text $script:element"
             
+            $script:ListFormOK.Controls.Clear()
             $script:ListFormOK.Controls.Add($script:FormLabelExp)
             $script:ListFormOK.Controls.Add($script:FormLabelInfo)
             $script:ListFormOK.Controls.Add($script:pictureBoxMonster)
-            $script:ListFormOK.Controls.Add($script:pictureBoxRedPoint)
+            if (($XLocationMonster) -and ($ZLocationMonster))
+            {
+                $script:ListFormOK.Controls.Add($script:pictureBoxRedPoint)
+            }
             $script:ListFormOK.Controls.Add($script:pictureBoxMap)
+            $script:ListFormOK.Controls.Add($script:pictureBoxMapT)
+            $script:ListFormOK.Controls.Add($script:pictureBoxMapB)
+            $script:ListFormOK.Controls.Add($script:pictureBoxMapE)
+            $script:ListFormOK.Controls.Add($script:pictureBoxMapW)
+            $script:ListFormOK.Controls.Add($script:pictureBoxMapTW)
+            $script:ListFormOK.Controls.Add($script:pictureBoxMapTE)
+            $script:ListFormOK.Controls.Add($script:pictureBoxMapBE)
+            $script:ListFormOK.Controls.Add($script:pictureBoxMapBW)
             $script:ListFormOK.ShowDialog()
             
             #[System.Windows.Forms.MessageBox]::Show( "$script:monsterkillbeforeup_Text $monsterkillbeforeup" + "`r`n" + "$script:ExperienceMonster_Text $ExperienceMonster%" + "`r`n" + "$script:ExperienceMonsterMinute_Text $ExperienceMonsterMinute%" + "`r`n" + "$script:ExperienceMonsterHeure_Text $ExperienceMonsterHeure%" + "`r`n" + "$script:Timebeforeup_Text $TimebeforeupHeu h $TimebeforeupMin m $TimebeforeupSec s", "$SelectItemMonster", 0)
